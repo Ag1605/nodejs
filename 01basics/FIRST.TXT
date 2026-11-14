@@ -1,0 +1,102 @@
+What is Node.js ? 
+
+Node.js is a JavaScript runtime environment that allows us to run JavaScript outside the browser,
+especially on the server side.Understand it in an easy way Normally,
+JavaScript runs inside a browser (Chrome, Firefox) to make websites interactive.But what if we want to use JavaScript to: - Create a backend.- Connect to a database.- Handle user login
+and registration.- Build APIs.- Handle server requests.That 's where Node.js comes in. It allows JavaScript to run outside the browser.
+Real-life example
+Imagine you are using an e-commerce website.
+1. You click the Login button.
+2. The frontend sends your email and password to the backend.
+3. Node.js handles the request.
+4. Node.js communicates with the database to verify your details.
+5. It sends a response back to the frontend.
+
+
+
+Interview answer
+If an interviewer asks, "What is Node.js?", you can say:
+
+"Node.js is an open-source, cross-platform JavaScript runtime environment built on Chrome's V8 JavaScript engine. It allows developers to execute JavaScript outside the browser and build server-side applications, APIs and backend services.
+
+
+EMEBEDING V8 WITH C++ .
+
+
+DOM AND WINDOW RELATED ARE REMOVED
+.................................................................................................................................................................
+What is package.json in Node.js?
+package.json is a configuration file in a Node.js project that stores project information, dependencies, scripts, and other settings.
+
+Think of it as the identity card of your Node.js project.
+1. Example of package.json
+When you create a Node.js project, you can generate this file using:
+npm init -y
+
+
+It creates a package.json file.
+
+Example:
+{
+  "name": "my-project",
+  "version": "1.0.0",
+  "description": "My first Node.js project",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "express": "^5.0.0"
+  }
+}
+
+
+2. Understand each property
+Property	Meaning
+name	Project name
+version	Project version
+description	What the project does
+main	Main entry point
+scripts	Commands to run
+dependencies	External packages required by the project
+
+3. Why do we use package.json?
+Suppose you are building a backend using Node.js and Express.
+
+You install Express:
+npm install express
+
+
+Express gets added to the dependencies section of package.json.
+
+This helps other developers install the required packages using:
+npm install
+
+
+4. What are scripts?
+You can define shortcuts for commands.
+
+For example:
+"scripts": {
+  "start": "node app.js"
+}
+
+
+Now instead of writing:
+node app.js
+
+
+You can simply run:
+npm start
+
+
+
+5. Interview answer
+What is package.json?
+
+"package.json is a configuration file in Node.js that contains project metadata, dependencies, version information, and scripts. It helps manage project packages and execute commands."
+Remember these 3 things
+- npm init -y → Creates package.json.
+- npm install express → Installs a package and records the dependency.
+- npm start → Runs the start script.
+Next concept to learn: package-lock.json — it is closely related to package.json and is commonly asked in Node.js interviews.
