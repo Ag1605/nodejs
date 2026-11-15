@@ -1,0 +1,182 @@
+Modules in Node.js
+A module in Node.js is simply a reusable piece of code that we can create in one file and use in another file.
+
+Think of modules like this:
+
+Suppose you are building a big application. Instead of writing all the code in one file, you divide it into smaller files.
+- math.js → Mathematical operations
+- user.js → User-related functions
+- server.js → Server-related code
+Each file can work as a separate module.
+1. Types of Modules in Node.js
+There are mainly three types:
+1. Core Modules (Built-in)
+
+Already provided by Node.js. You don't need to install them.
+
+Examples: fs, http, path, os.
+
+2. Local Modules (User-defined)
+
+Modules that we create ourselves.
+
+Example: math.js, user.js.
+
+3. Third-party Modules
+
+Modules created by other developers and installed using npm.
+
+Examples: express, mongoose, cors, axios.
+
+2. Core Modules
+These modules are already available in Node.js.
+
+Some important examples:
+Module	Purpose
+fs	Read and write files
+http	Create HTTP servers
+path	Work with file paths
+os	Get operating system information
+events	Handle events
+
+Example: Using the fs module
+const fs = require('fs');
+
+// Create a file and write data
+fs.writeFileSync("hello.txt", "Hello Node.js");
+
+// Read the file
+const data = fs.readFileSync("hello.txt", "utf8");
+
+console.log(data);
+
+
+Output:
+Hello Node.js
+
+
+Here:
+- require('fs') imports the built-in filesystem module.
+- writeFileSync() creates and writes a file.
+- readFileSync() reads the file.
+3. Local Modules
+Let's understand how to create our own module.
+
+Suppose we have two files:
+my-project
+
+math.js
+
+app.js
+
+
+
+Step 1: Create math.js
+function add(a, b) {
+    return a + b;
+}
+
+function subtract(a, b) {
+    return a - b;
+}
+
+// Export functions
+module.exports = {
+    add,
+    subtract
+};
+
+
+Step 2: Create app.js
+// Import math module
+const math = require('./math');
+
+// Use its functions
+console.log(math.add(10, 20));
+
+console.log(math.subtract(20, 10));
+
+
+Output:
+30
+10
+
+
+Understand these two important things:
+- module.exports → Sends functions or variables out of a file.
+- require() → Imports those functions or variables into another file.
+Remember: ./math means the math file in the current directory.
+4. Third-party Modules
+These are modules developed by other people.
+
+We install them using npm (Node Package Manager).
+
+For example, installing Express:
+npm install express
+
+
+Using Express:
+const express = require('express');
+
+const app = express();
+
+app.get('/', (req, res) => {
+    res.send("Hello World");
+});
+
+app.listen(3000);
+
+
+Here, Express is a third-party module.
+5. CommonJS vs ES Modules
+Node.js supports two major module systems.
+CommonJS	ES Modules
+require()	import
+module.exports	export
+Traditional Node.js system	Modern JavaScript system
+
+CommonJS example:
+// math.js
+module.exports = add;
+
+
+// app.js
+const add = require('./math');
+
+
+ES Modules example:
+// math.js
+export function add(a, b) {
+    return a + b;
+}
+
+
+// app.js
+import { add } from './math.js';
+
+
+To use ES Modules in a Node.js project, you can set this in package.json:
+{
+    "type": "module"
+}
+
+
+
+6. Quick Revision for Interviews
+Question	Answer
+What is a module?	Reusable piece of code.
+What is require()?	Imports a CommonJS module.
+What is module.exports?	Exports code from a CommonJS module.
+What is npm?	Node Package Manager.
+What is fs?	Built-in file system module.
+What is Express?	Third-party Node.js framework.
+What is path?	Built-in module for handling file paths.
+
+My recommendation: Learn these concepts in this order:
+1. Modules in Node.js
+2. require() and module.exports
+3. Core modules (fs, http, path)
+4. npm and package.json
+5. CommonJS vs ES Modules
+6. Express.js
+Next, I recommend learning require(), module.exports, and exports in depth because they are the foundation of how Node.js files communicate with each other.
