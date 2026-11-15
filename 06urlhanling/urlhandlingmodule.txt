@@ -1,0 +1,84 @@
+3. What is the URL module?
+Node.js provides a built-in URL API to parse and understand URLs.
+
+Example:
+const myURL = new URL(
+    'https://example.com:8080/users?id=10&name=Akshat'
+);
+
+console.log(myURL.hostname);
+console.log(myURL.port);
+console.log(myURL.pathname);
+console.log(myURL.search);
+
+
+Output:
+example.com
+8080
+/users
+?id=10&name=Akshat
+
+
+Let's understand the properties:
+Property	Meaning
+hostname	Domain name
+port	Port number
+pathname	URL path
+search	Query string
+searchParams	Access query parameters
+protocol	HTTP or HTTPS
+
+4. Handling Query Parameters
+This is very important when building backend APIs.
+
+Suppose the client requests:
+http://localhost:8000/user?name=Akshat&age=25
+
+
+Here:
+- /user is the pathname.
+- name=Akshat is a query parameter.
+- age=25 is another query parameter.
+Let's extract them.
+const http = require('http');
+
+const server = http.createServer((req, res) => {
+
+    const myURL = new URL(req.url, 'http://localhost:8000');
+
+    const pathname = myURL.pathname;
+
+    const name = myURL.searchParams.get('name');
+
+    const age = myURL.searchParams.get('age');
+
+    console.log(pathname);
+    console.log(name);
+    console.log(age);
+
+    res.end("URL handled successfully");
+
+});
+
+server.listen(8000, () => {
+    console.log("Server running on port 8000");
+});
+
+
+Open:
+http://localhost:8000/user?name=Akshat&age=25
+
+
+Output in terminal:
+/user
+Akshat
+25
+
+
+Understand this important line:
+const myURL = new URL(req.url, 'http://localhost:8000');
+
+
+- req.url contains the requested path and query string.
+- The second argument provides the base URL.
+- new URL() parses the URL into different components.
