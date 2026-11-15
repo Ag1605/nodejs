@@ -1,0 +1,51 @@
+explain inn interview
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+How Node.js Works – Architecture (Interview Answer)
+Interview-ready answer
+"Node.js is a JavaScript runtime environment that allows us to execute JavaScript outside the browser. It is built on Google's V8 JavaScript Engine, which executes JavaScript code by compiling it into machine code.
+
+Node.js follows a single-threaded, event-driven, non-blocking I/O architecture. This means JavaScript code generally runs on a single main thread, but Node.js can handle multiple operations concurrently without waiting for each operation to finish.
+
+When we execute a Node.js application, the V8 engine executes the JavaScript code using the Call Stack. If Node.js encounters a synchronous operation, it executes it directly. However, when it encounters an asynchronous operation, such as reading a file, setting a timer, or making a network request, the operation is handled by the Node.js runtime with the help of libuv and the operating system.
+
+libuv provides the Event Loop, which coordinates asynchronous operations, and a Thread Pool, which handles certain tasks like file system operations, DNS lookup, and cryptographic operations.
+
+Once an asynchronous operation is completed, its callback becomes ready for execution. The Event Loop schedules the callback when the JavaScript Call Stack is available. This allows Node.js to continue handling other tasks instead of blocking the main thread while waiting for an operation to complete.
+
+Because of this architecture, Node.js is particularly useful for building scalable applications, APIs, real-time applications, and applications that handle multiple network requests."
+
+Understand the architecture components
+These are the components an interviewer might ask you to explain further.
+
+
+
+
+
+
+
+
+sparkleweb.in
+
+
+Component	Interview explanation
+V8 Engine	Executes JavaScript code.
+Call Stack	Manages function execution.
+Event Loop	Coordinates asynchronous callback execution.
+libuv	Provides the event loop, thread pool and asynchronous I/O support.
+Thread Pool	Handles certain background operations.
+Callback Queue	Holds callbacks waiting for their execution phase.
+Microtask Queue	Handles Promise reactions and other microtasks.
