@@ -1,0 +1,105 @@
+REST API in Node.js / Express.js
+REST API is one of the most important concepts in backend development, especially when building MERN applications.
+
+Let's understand it from the basics with examples.
+1. What is REST API?
+REST stands for Representational State Transfer.
+
+REST API is an architectural style used to allow communication between a client and a server over HTTP.
+
+In simple words:
+
+A REST API allows the frontend and backend to communicate with each other using HTTP requests.
+
+For example, imagine you are building a user registration application.
+- React frontend sends user information.
+- Express backend receives the request.
+- Backend processes the information.
+- MongoDB stores the information.
+- Backend sends a response to React.
+
+
+
+
+
+
+
+
+linkedin.com
+
+
+2. How REST API works
+Suppose you want to get all users from a database.
+
+The frontend sends:
+GET /api/users
+
+
+The backend processes the request and returns:
+{
+    "success": true,
+    "users": [
+        {
+            "id": 1,
+            "name": "Akshat"
+        },
+        {
+            "id": 2,
+            "name": "Rahul"
+        }
+    ]
+}
+
+
+This is how frontend and backend communicate through a REST API.
+3. HTTP methods used in REST API
+REST APIs commonly use these HTTP methods.
+Method	Operation	Example
+GET	Read data	/api/users
+POST	Create data	/api/users
+PUT	Replace data	/api/users/1
+PATCH	Partially update data	/api/users/1
+DELETE	Delete data	/api/users/1
+
+These are the same HTTP methods you just learned in Express.
+4. What are REST API principles?
+There are some important principles of REST.
+1. Client-Server Architecture
+Frontend and backend work independently.
+
+Example:
+- React handles UI.
+- Express handles backend logic.
+- MongoDB stores data.
+2. Statelessness
+Every request should contain all the information needed to process it.
+
+The server doesn't depend on remembering the previous request's application state.
+
+For example, if a user accesses a protected API, the request can include an authentication token.
+3. Uniform Interface
+APIs should follow consistent resource-based URLs and HTTP methods.
+
+Example:
+GET    /api/users
+POST   /api/users
+GET    /api/users/1
+PUT    /api/users/1
+DELETE /api/users/1
+
+
+4. Cacheability
+Responses should indicate whether they can be cached so clients can reuse appropriate responses instead of requesting the same data repeatedly.
+5. Layered System
+The client doesn't need to know whether the request passes through a proxy, load balancer or other intermediate layer.
+5. REST API vs Normal API
+An API is a general interface that allows different software systems to communicate.
+
+REST is one architectural style for designing APIs.
+API	REST API
+General communication interface	Follows REST architectural constraints
+Can use different protocols	Commonly uses HTTP
+Can follow different designs	Uses resource-oriented design
+Not necessarily stateless	Must follow statelessness
+
+Other API styles include GraphQL, RPC and SOAP.
