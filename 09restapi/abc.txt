@@ -103,3 +103,19 @@ Can follow different designs	Uses resource-oriented design
 Not necessarily stateless	Must follow statelessness
 
 Other API styles include GraphQL, RPC and SOAP.
+
+ddd 8. Important REST API interview questions
+Question	Answer
+What is REST?	Architectural style for designing network APIs.
+What is REST API?	An API designed according to REST constraints.
+What is statelessness?	Each request contains the information needed to process it.
+What is a resource?	An entity such as a user, product or order.
+What is an endpoint?	A URL through which an API resource or operation is accessed.
+What is JSON?	A lightweight data-interchange format.
+Is REST API always JSON?	No, REST can use other representations too.
+Is Express a REST API?	No, Express is a framework used to build REST APIs and other web applications.
+
+9. Interview-ready answer
+If an interviewer asks, "What is REST API?", you can explain:
+
+"REST API stands for Representational State Transfer Application Programming Interface. It is an architectural style used for communication between client and server over HTTP. It uses resource-based URLs and HTTP methods such as GET, POST, PUT, PATCH and DELETE to perform CRUD operations. REST follows principles such as client-server architecture, statelessness, a uniform interface and cacheability. In my Node.js applications, I use Express.js to create REST API endpoints, handle requests and responses, and connect with MongoDB to store and retrieve data."
