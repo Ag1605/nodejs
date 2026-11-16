@@ -1,0 +1,154 @@
+http method
+HTTP Methods in Node.js
+HTTP methods define what action the client wants the server to perform on a resource.
+
+For example, suppose you are building a user management application.
+
+Get all users.
+
+Create a new user.
+
+Update an existing user.
+
+Delete a user.
+
+We use different HTTP methods for these operations.
+
+1. Types of HTTP Methods
+There are five important HTTP methods you should understand.
+
+GET
+Retrieve data
+
+Example: Get all users
+
+POST
+Create new data
+
+Example: Register a user
+
+PUT
+Replace existing data
+
+Example: Replace a user's complete profile
+
+PATCH
+Partially update data
+
+Example: Change only the user's name
+
+DELETE
+Delete existing data
+
+Example: Delete a user
+
+2. Understand with a real-life example
+Suppose your database contains this user:
+
+{
+    "id": 1,
+    "name": "Akshat",
+    "age": 25,
+    "city": "Delhi"
+}
+
+Now see how HTTP methods work.
+
+Method
+
+Operation
+
+GET
+
+Retrieve Akshat's details
+
+POST
+
+Create another user
+
+PUT
+
+Replace Akshat's complete details
+
+PATCH
+
+Change only Akshat's city
+
+DELETE
+
+Delete Akshat
+...............................................................................................................................
+
+
+Keep this terminal running. Don't close it.
+Step 4. Open Postman
+
+
+
+
+
+
+
+
+
+
+Postman
+
+API testing application
+Download Postman
+
+1. Open Postman.
+2. Click New HTTP Request.
+3. Select POST from the method dropdown.
+4. Enter this URL:
+http://localhost:8000/users
+
+
+Step 5. Send JSON data
+In Postman:
+1. Click the Body tab.
+2. Select raw.
+3. From the format dropdown, select JSON.
+4. Paste this data:
+{
+    "name": "Akshat",
+    "age": 25,
+    "city": "Delhi"
+}
+
+
+Your Postman configuration should look like this:
+
+
+
+
+
+
+
+
+cpit251.github.io
+
+
+Click Send.
+Step 6. Check the response
+Expected response
+Postman should show:
+User received successfully
+
+
+HTTP status:
+201 Created
+
+
+Now check your VS Code terminal.
+
+You should see:
+{
+  name: 'Akshat',
+  age: 25,
+  city: 'Delhi'
+}
+
+
+Congratulations! Your Node.js server has successfully received JSON data from Postman.
+Step 7. Understand the complete flow
