@@ -1,0 +1,335 @@
+This means the request was successfully processed.
+1. Types of HTTP Status Codes
+There are five major categories.
+1xx
+Informational
+
+Request received; processing continues.
+
+
+
+2xx
+Success
+
+Request successfully received and processed.
+
+
+
+3xx
+Redirection
+
+Further action is needed to complete the request.
+
+
+
+4xx
+Client Error
+
+Problem with the request sent by the client.
+
+
+
+5xx
+Server Error
+
+Server failed to fulfil a valid request.
+
+
+
+2. 2xx – Success Status Codes
+These indicate that the request was successful.
+Status code	Meaning	When to use
+200	OK	Successfully fetched or updated data
+201	Created	Successfully created a resource
+202	Accepted	Request accepted for processing, but not completed
+204	No Content	Request successful, no response body
+
+Example:
+
+Suppose you create a new user using POST.
+app.post('/users', (req, res) => {
+
+    res.status(201).json({
+        message: "User created successfully"
+    });
+
+});
+
+
+Here, 201 means a new user was successfully created.
+3. 3xx – Redirection Status Codes
+These indicate that the client needs to take additional action.
+Status code	Meaning
+301	Moved Permanently
+302	Found (temporary redirect)
+304	Not Modified
+307	Temporary Redirect
+308	Permanent Redirect
+
+Example:
+app.get('/old-page', (req, res) => {
+
+    res.redirect(301, '/new-page');
+
+});
+
+
+The client is redirected to /new-page.
+4. 4xx – Client Error Status Codes
+These indicate that something is wrong with the client request.
+
+These are very important in backend development.
+Status code	Meaning	Example
+400	Bad Request	Missing or invalid input
+401	Unauthorized	Missing or invalid authentication credentials
+403	Forbidden	User doesn't have permission
+404	Not Found	Requested user doesn't exist
+405	Method Not Allowed	HTTP method not supported for that resource
+409	Conflict	Duplicate email or conflicting resource state
+422	Unprocessable Content	Request content fails validation
+429	Too Many Requests	Rate limit exceeded
+
+Understand the difference between 401 and 403
+This is a common interview question.
+
+401 – Unauthorized
+
+The user is not properly authenticated.
+
+Example: User hasn't provided a valid JWT token.
+
+403 – Forbidden
+
+The user is authenticated but doesn't have permission.
+
+Example: A normal user tries to access an admin-only API.
+Easy trick to remember
+- 401 → Who are you? Authentication problem.
+- 403 → I know who you are, but you cannot access this.
+
+5. 5xx – Server Error Status Codes
+These indicate that the server failed to process a request.
+Status code	Meaning	Example
+500	Internal Server Error	Unexpected server-side error
+501	Not Implemented	Server doesn't support the requested functionality
+502	Bad Gateway	Invalid response from upstream server
+503	Service Unavailable	Server temporarily unavailable
+504	Gateway Timeout	Upstream server didn't respond in time
+
+Example:
+app.get('/data', (req, res) => {
+
+    res.status(500).json({
+        message: "Internal Server Error"
+    });
+
+});
+
+
+6. Most Important Status Codes for Interviews
+Remember these first:
+200
+OK – Request successful.
+201
+Created – Resource created successfully.
+400
+Bad Request – Invalid request.
+401
+Unauthorized – Authentication required or invalid.
+403
+Forbidden – Access denied.
+404
+Not Found – Resource doesn't exist.
+500
+Internal Server Error – Server-side failure.
+7. How to use HTTP Status Codes in Express.js
+Let's create a practical REST API.
+const express = require('express');
+
+const app = express();
+
+app.use(express.json());
+
+let users = [
+    { id: 1, name: "Akshat" },
+    { id: 2, name: "Rahul" }
+];
+
+// GET all users
+app.get('/users', (req, res) => {
+
+    res.status(200).json({
+        message: "Users fetched successfully",
+        users: users
+    });
+
+});
+
+// GET single user
+app.get('/users/:id', (req, res) => {
+
+    const id = Number(req.params.id);
+
+    const user = users.find(u => u.id === id);
+
+    if (!user) {
+        return res.status(404).json({
+            message: "User not found"
+        });
+    }
+
+    res.status(200).json(user);
+
+});
+
+// POST create user
+app.post('/users', (req, res) => {
+
+    const { name } = req.body;
+
+    if (!name) {
+        return res.status(400).json({
+            message: "Name is required"
+        });
+    }
+
+    const newUser = {
+        id: Math.max(0, ...users.map(u => u.id)) + 1,
+        name: name
+    };
+
+    users.push(newUser);
+
+    res.status(201).json({
+        message: "User created",
+        user: newUser
+    });
+
+});
+
+// DELETE user
+app.delete('/users/:id', (req, res) => {
+
+    const id = Number(req.params.id);
+
+    const index = users.findIndex(u => u.id === id);
+
+    if (index === -1) {
+        return res.status(404).json({
+            message: "User not found"
+        });
+    }
+
+    users.splice(index, 1);
+
+    res.status(204).send();
+
+});
+
+app.listen(8000, () => {
+    console.log("Server running on port 8000");
+});
+
+
+Notice this syntax:
+res.status(201).json({
+    message: "User created"
+});
+
+
+- res.status(201) sets the HTTP status code.
+- .json() sends the JSON response.
+For DELETE, we used 204 and res.send() without a body because 204 responses must not contain a response body.
+8. HTTP Status Codes vs HTTP Methods
+Don't confuse these two concepts.
+HTTP Methods	HTTP Status Codes
+Define what action client wants	Tell the result of the request
+GET, POST, PUT, DELETE	200, 201, 400, 404, 500
+Sent in the request	Sent in the response
+
+Example:
+Client sends:
+
+POST /api/users
+
+Server responds:
+
+201 Created
+
+
+
+9. Interview-ready answer
+If an interviewer asks, "What are HTTP status codes?", explain:
+
+"HTTP status codes are three-digit numbers returned by the server in response to an HTTP request. They indicate whether the request was successful, requires redirection, or resulted in an error. They are divided into five categories: 1xx informational, 2xx success, 3xx redirection, 4xx client errors and 5xx server errors. In Express.js, we can send status codes using res.status(). For example, 200 represents success, 201 represents resource creation, 400 represents a bad request, 401 represents an authentication problem, 404 means resource not found, and 500 represents an internal server error."
+10. Test your understanding
+HTTP status code quiz
+0/6 answered
+
+1. Which status code indicates successful resource creation?
+
+200
+
+201
+
+404
+
+
+
+
+2. User is logged in but doesn't have admin permission. Which status code?
+
+401
+
+403
+
+500
+
+
+
+
+3. A requested user ID does not exist. Which status code?
+
+404
+
+201
+
+301
+
+
+
+
+4. Which category represents server errors?
+
+2xx
+
+4xx
+
+5xx
+
+
+
+
+5. Which Express method sets the HTTP status code?
+
+req.status()
+
+res.status()
+
+app.status()
+
+
+
+
+6. Which status code means the request succeeded without a response body?
+
+200
+
+204
+
+201
+
+
+
+Submit answers
+Next topic in your Node.js backend roadmap: Error handling in Express.js, including try-catch, next(error) and centralized error-handling middleware.
