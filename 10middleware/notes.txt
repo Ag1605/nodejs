@@ -1,0 +1,82 @@
+express middleware
+Express Middleware in Node.js
+Middleware is one of the most important concepts in Express.js. You will use it in almost every backend project, including MERN applications.
+
+Let's understand it from the basics with examples.
+
+1. What is middleware?
+Middleware is a function that executes during the request-response cycle in Express.js.
+
+In simple words, when a client sends a request to the server, middleware gets an opportunity to process that request before it reaches the final route handler.
+
+Middleware can:
+
+Execute code.
+
+Read and modify the request object (req).
+
+Read and modify the response object (res).
+
+End the request-response cycle.
+
+Pass control to the next middleware using next().
+
+
+- Pass control to the next middleware using next().
+2. How middleware works
+Suppose a user sends a request to your Express server.
+Client / Postman
+
+Sends HTTP request
+
+
+Middleware 1
+
+Logs request
+
+
+Middleware 2
+
+Checks authentication
+
+
+Route Handler
+
+Processes requested operation
+
+
+Response to Client
+..................................
+
+
+
+Why do we use express.json()?
+
+Because incoming JSON data needs to be parsed before we can conveniently access it through req.body.
+
+Without the middleware, req.body will generally be undefined for JSON requests.
+..........................................
+9. Third-party middleware
+Third-party middleware is developed by other developers and installed through npm.
+
+Some common examples:
+Middleware	Purpose
+cors	Controls cross-origin requests
+morgan	Logs HTTP requests
+cookie-parser	Parses cookies
+helmet	Adds security-related HTTP headers
+multer	Handles multipart file uploads
+.....................................
+In Express.js middleware, modifying request and response objects means we can add our own properties or change existing properties of req and res before sending the response.
+
+Let's understand with practical examples.
+1. Modifying the Request Object (req)
+The req object contains information about the incoming request.
+
+For example:
+- req.url – Requested URL.
+- req.method – HTTP method.
+- req.body – Request body.
+- req.params – Route parameters.
+- req.query – Query parameters.
+Middleware can also add custom properties to req.

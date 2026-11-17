@@ -1,0 +1,301 @@
+HTTP Headers in API (Node.js / Express.js)
+HTTP headers are an important part of API communication.
+
+HTTP headers are key-value pairs sent along with an HTTP request or response. They provide additional information about the request or response.
+
+In simple words, headers tell the server or client how to understand and process the data being transferred.
+1. Why do we need HTTP headers?
+Suppose your React frontend sends user information to your Express backend.
+{
+    "name": "Akshat",
+    "age": 25
+}
+
+
+But how does the backend know that the incoming data is JSON?
+
+This is where HTTP headers help.
+
+For example:
+Content-Type: application/json
+
+
+This tells the receiver that the message body contains JSON data.
+2. How HTTP headers work
+There are two main types:
+Request Headers
+Client → Server
+
+Provide information about the request.
+
+Examples:
+- Content-Type
+- Authorization
+- Accept
+- User-Agent
+
+
+Response Headers
+Server → Client
+
+Provide information about the response.
+
+Examples:
+- Content-Type
+- Cache-Control
+- Set-Cookie
+- Access-Control-Allow-Origin
+
+
+3. Important HTTP headers
+These are commonly used in backend development and interviews.
+Header	Purpose
+Content-Type	Describes the format of the message body
+Accept	Specifies which response formats the client can accept
+Authorization	Sends authentication credentials
+User-Agent	Identifies the client software
+Cache-Control	Controls caching behavior
+Set-Cookie	Sends cookies from server to client
+Cookie	Sends cookies from client to server
+Origin	Identifies the origin of a request
+Host	Identifies the target host
+Content-Length	Indicates message body size in bytes
+
+4. Understand Content-Type
+Suppose Postman sends this JSON:
+{
+    "name": "Akshat",
+    "age": 25
+}
+
+
+The request header is:
+Content-Type: application/json
+
+
+This tells Express that the request body is JSON.
+
+In Express:
+const express = require('express');
+
+const app = express();
+
+// Middleware to parse JSON
+app.use(express.json());
+
+app.post('/users', (req, res) => {
+
+    console.log(req.body);
+
+    res.json({
+        message: "User received",
+        user: req.body
+    });
+
+});
+
+app.listen(8000);
+
+
+Important: Content-Type describes the body format. express.json() is the middleware that parses the JSON body.
+5. Understand Authorization header
+This is especially important for authentication.
+
+Suppose a user logs into your application and receives a JWT token.
+
+The frontend sends that token in subsequent API requests:
+Authorization: Bearer your_jwt_token
+
+
+In Express, we can access it:
+app.get('/dashboard', (req, res) => {
+
+    const token = req.headers.authorization;
+
+    console.log(token);
+
+    res.send("Dashboard");
+
+});
+
+
+Here:
+req.headers.authorization
+
+
+Reads the Authorization header.
+
+In a real application, you must verify the token before granting access.
+6. How to access HTTP headers in Express.js
+There are two useful ways.
+
+Method 1: Using req.headers
+app.get('/users', (req, res) => {
+
+    console.log(req.headers);
+
+    res.send("Headers received");
+
+});
+
+
+This returns the request headers as an object.
+
+Method 2: Using req.get()
+app.get('/users', (req, res) => {
+
+    const contentType = req.get('Content-Type');
+
+    const authorization = req.get('Authorization');
+
+    res.json({
+        contentType,
+        authorization
+    });
+
+});
+
+
+req.get() retrieves a specific request header.
+7. How to send response headers in Express
+We can also create our own response headers.
+app.get('/', (req, res) => {
+
+    res.set('X-App-Name', 'My Express App');
+
+    res.set('Content-Type', 'application/json');
+
+    res.status(200).json({
+        message: "Hello World"
+    });
+
+});
+
+
+Here:
+res.set('X-App-Name', 'My Express App');
+
+
+Sets a custom response header.
+
+You can check it in Postman under the response Headers tab.
+8. How to test headers using Postman
+Let's perform a practical exercise.
+
+
+
+
+
+
+
+
+community.postman.com
+
+
+1. Open Postman.
+2. Create a new HTTP request.
+3. Select GET.
+4. Enter http://localhost:8000/users.
+5. Click the Headers tab.
+6. Add the following:
+Key	Value
+Authorization	Bearer abc123
+Accept	application/json
+
+7. Click Send.
+
+Your Express server can access these values through req.headers.
+
+9. Headers vs Request Body vs URL Parameters
+This is a common interview question.
+
+Suppose you send this request:
+POST /api/users/10?active=true
+Authorization: Bearer abc123
+Content-Type: application/json
+
+
+Body:
+{
+    "name": "Akshat",
+    "age": 25
+}
+
+
+Understand the difference:
+Component	Information	Express property
+URL parameter	10	req.params.id
+Query parameter	active=true	req.query.active
+Headers	Authorization, Content-Type	req.headers
+Body	Name and age	req.body
+
+Remember this:
+- req.params → Which resource?
+- req.query → What filtering or options?
+- req.headers → Additional request information?
+- req.body → What data is being sent?
+
+10. Interview-ready answer
+If an interviewer asks, "What are HTTP headers in APIs?", explain:
+
+"HTTP headers are key-value pairs exchanged between clients and servers as part of HTTP requests and responses. They provide additional information about the message, such as its content type, authentication credentials, accepted response formats and caching instructions. There are request headers and response headers. In Express.js, we can access request headers using req.headers or req.get(), and set response headers using res.set()."
+11. Quick interview quiz
+HTTP headers quiz
+0/5
+
+1. Which header specifies that the request body contains JSON?
+
+Authorization
+
+Content-Type
+
+User-Agent
+
+
+
+
+2. Which header is commonly used to send JWT credentials?
+
+Accept
+
+Host
+
+Authorization
+
+
+
+
+3. How do you access request headers in Express?
+
+req.headers
+
+res.headers
+
+req.body
+
+
+
+
+4. Which method sets a response header?
+
+req.get()
+
+res.set()
+
+res.send()
+
+
+
+
+5. Which header tells the server what response format the client accepts?
+
+Accept
+
+Content-Length
+
+Cookie
+
+
+
+Submit answers
+Next topic I recommend: HTTP status codes (200, 201, 400, 401, 403, 404, 500). They work closely with HTTP headers and API responses.
