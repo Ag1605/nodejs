@@ -1,0 +1,177 @@
+MVC Architecture in Node.js, Express.js and MongoDB
+Now that you've created a MongoDB CRUD API, let's understand MVC Architecture and organize your backend code professionally.
+
+MVC stands for:
+- M – Model
+- V – View
+- C – Controller
+MVC is a software architectural pattern that separates an application's responsibilities into different components.
+
+
+1. Why do we need MVC?
+Previously, we wrote all our code in one file:
+server.js
+    |
+    ├── Database connection
+    ├── Create student API
+    ├── Get student API
+    ├── Update student API
+    └── Delete student API
+
+
+Imagine your application has 50 APIs.
+
+Your server.js becomes huge and difficult to maintain.
+
+MVC solves this problem by separating responsibilities.
+2. Understand MVC with a real-life example
+Imagine a student management application.
+
+A user wants to see all students.
+1. The user sends a request.
+2. The Controller handles the request.
+3. The Model communicates with MongoDB.
+4. The Controller receives the data.
+5. The View presents the result.\
+
+
+
+3. Understand each component
+M – Model
+The Model handles the data structure and database interaction.
+
+For example, our Student model:
+
+models/Student.js
+
+Remember: Model defines how student data is structured and provides methods to interact with MongoDB.
+C – Controller
+Most important for backend development
+The Controller contains the application logic.
+
+It receives requests, interacts with models, and sends responses.
+
+For example:
+
+controllers/studentController.js
+
+
+V – View
+The View is the presentation layer, which displays data to the user.
+
+In a traditional Express MVC application, the View could be an EJS or Pug template.
+
+In a MERN application, React generally acts as the View.
+
+Example React component:
+
+4. What about Routes?
+You might be thinking: We have Model, View and Controller, so where do Routes fit?
+
+Routes are responsible for defining API endpoints and connecting them to controller functions.
+
+Create:
+
+routes/studentRoutes.js
+
+
+
+We are not writing the database logic here.
+
+We are simply saying:
+
+"When someone sends a GET request to this route, execute the getStudents controller function."
+
+5. Complete project structure
+Now our project looks like this:
+mongodb-express-crud/
+
+ models/
+
+ Student.js
+Model
+
+
+ controllers/
+
+ studentController.js
+Controller
+
+
+ routes/
+
+ studentRoutes.js
+Routes
+
+
+ server.js
+
+ .env
+
+ .gitignore
+
+
+
+ ..................................
+ 6. Update server.js
+Now server.js becomes much cleaner.
+
+
+
+7. Understand the complete request flow
+Suppose you send:
+GET http://localhost:5000/api/students
+
+
+1. Client / Postman
+
+GET /api/students
+
+
+2. Route
+
+studentRoutes.js
+
+router.get("/", getStudents)
+
+
+3. Controller
+
+studentController.js
+
+getStudents()
+
+
+4. Model
+
+Student.js
+
+Student.find()
+
+
+5. MongoDB
+
+Returns student documents
+
+
+6. Controller sends JSON response
+
+res.status(200).json()
+
+
+The important thing is:
+- Routes decide which controller function to call.
+- Controllers decide what action to perform.
+- Models handle database structure and interaction.
+- Views display data to the user.
+8. MVC vs Routes vs Controllers
+Component	Responsibility
+Model	Database structure and operations
+View	User interface / presentation
+Controller	Request handling and application logic
+Routes	API endpoint mapping
+Middleware	Runs between request and route/controller
+
+Routes and middleware are commonly used alongside MVC in Express applications, although they are not the three original MVC components.
+9. Interview answer: What is MVC architecture?
+MVC stands for Model-View-Controller. It is a software architectural pattern that separates an application into three components. The Model handles data and database operations, the View handles the presentation layer, and the Controller contains application logic and handles incoming requests. In Node.js and Express.js, we commonly organize our backend using separate models, controllers and routes. This separation makes applications easier to maintain, test, scale and debug.
