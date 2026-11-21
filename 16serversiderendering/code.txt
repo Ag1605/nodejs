@@ -1,0 +1,25 @@
+1. What is Server-Side Rendering?
+Server-Side Rendering (SSR) is a technique in which the server generates the HTML page and sends the ready-to-display HTML to the browser.
+
+Let's understand with an example.
+
+Imagine you open an e-commerce website and visit a product page.
+
+The server:
+1. Receives your request.
+2. Fetches product information from the database.
+3. Generates HTML containing product details.
+4. Sends that HTML to your browser.
+5. Browser displays the page.
+The important point is that the server creates the HTML before sending it to the browser.
+2. What is Client-Side Rendering (CSR)?
+To understand SSR, you must understand CSR too.
+
+Client-Side Rendering means the browser generates the page using JavaScript.
+
+For example, in a traditional React application:
+1. Browser requests a webpage.
+2. Server sends a basic HTML file.
+3. Browser downloads JavaScript.
+4. React executes in the browser.
+5. React generates the page and displays content.
