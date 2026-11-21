@@ -1,0 +1,445 @@
+Authentication is one of the most important concepts in backend development. Almost every application uses it, including Instagram, Amazon, Netflix, banking applications, and e-commerce websites.
+
+By the end of this lesson, you will understand how registration and login work internally, how passwords are stored securely, and how to build a basic authentication system using Node.js, Express.js, MongoDB, and bcrypt.
+
+1. What is Authentication?
+Authentication means verifying the identity of a user.
+
+In simple language, authentication answers:
+Who are you?
+
+For example, when you log in to an application, you provide:
+- Email
+- Password
+The server checks whether these credentials belong to a registered user.
+
+If they are correct, the user is authenticated.
+
+If they are incorrect, login is rejected.
+Real-life example
+Imagine you enter your email and password on Instagram.
+Email: user@gmail.com
+Password: ********
+
+
+Instagram checks:
+1. Does this email exist?
+2. Is the password correct?
+3. If both are correct, allow login.
+This process is called authentication.
+
+2. Authentication vs Authorization
+These two terms are frequently asked in interviews.
+Authentication
+Who are you?
+
+Verifies the identity of a user.
+
+Example: Logging in with email and password.
+
+
+Authorization
+What are you allowed to access?
+
+Checks the permissions of an authenticated user.
+
+Example: Only an admin can delete users.
+
+
+Example:
+
+Suppose an application has two users:
+User A: Normal User
+User B: Admin
+
+
+Both can log in.
+
+But:
+- Normal user can view products.
+- Admin can add, update, and delete products.
+Authentication verifies both users.
+
+Authorization decides what each user can do.
+
+We will study authorization separately in Lesson 5.
+
+3. Why do we need Authentication?
+Imagine you build an e-commerce website without authentication.
+
+Anyone could:
+- Access another user's profile.
+- View another user's orders.
+- Modify someone else's account.
+- Access private information.
+Authentication helps ensure that a user has proved their identity before accessing their account.
+
+It is commonly used in:
+- Login systems
+- Registration systems
+- Banking applications
+- E-commerce websites
+- Social media
+- Admin dashboards
+
+4. How does Authentication work internally?
+Let's understand the complete registration and login flow.
+A. Registration flow
+When a new user registers:
+1. User enters details
+
+Name, email, password
+
+
+2. Frontend sends request
+
+POST /register
+
+
+3. Backend validates details
+
+Checks required fields and email format
+
+
+4. Password hashing
+
+bcrypt converts password into a secure hash
+
+
+5. Save user in MongoDB
+
+Store name, email, and password hash
+
+
+6. Registration successful
+
+
+B. Login flow
+When an existing user logs in:
+1. User enters email and password
+
+
+2. Backend receives login request
+
+POST /login
+
+
+3. Find user in MongoDB
+
+Search using email
+
+
+4. Compare password
+
+bcrypt compares entered password with stored hash
+
+
+5. Login successful
+
+Server confirms the user's identity
+
+
+But one important question remains:
+
+How do we store passwords securely?
+
+Let's understand that before writing code.
+
+5. What is Password Hashing?
+Password hashing is the process of converting a password into a fixed-format hash using a one-way cryptographic function.
+
+For example, the user enters:
+Password: hello123
+
+
+Instead of storing the actual password, we store something like:
+$2b$12$someLongHashedValue...
+
+
+This is a bcrypt hash.
+Why shouldn't we store plain-text passwords?
+Suppose your database contains:
+Email	Password
+user1@gmail.com	hello123
+user2@gmail.com	password123
+user3@gmail.com	akshat123
+
+If someone gains access to your database, they can immediately read all passwords.
+
+This is called storing passwords in plain text.
+
+It is dangerous.
+
+Instead, store password hashes:
+Email	Password Hash
+user1@gmail.com	$2b$12$...
+user2@gmail.com	$2b$12$...
+user3@gmail.com	$2b$12$...
+
+Now the original passwords aren't directly visible.
+
+6. What is bcrypt?
+bcrypt is a password-hashing library commonly used in Node.js applications.
+
+It provides two important methods:
+1. bcrypt.hash()
+Used during registration.
+It converts a plain-text password into a password hash.
+const bcrypt = require("bcrypt");
+
+const password = "hello123";
+
+const hashedPassword = await bcrypt.hash(password, 10);
+
+
+Here:
+- password is the original password.
+- 10 is the cost factor, also called salt rounds.
+- hashedPassword is the resulting hash.
+2. bcrypt.compare()
+Used during login.
+
+It compares the entered password with the stored hash.
+const isMatch = await bcrypt.compare(
+    "hello123",
+    hashedPassword
+);
+
+
+If the password is correct:
+true
+
+
+If the password is incorrect:
+false
+
+
+Important: Hashing vs Encryption
+Hashing	Encryption
+One-way process	Reversible with the correct key
+Original password cannot be recovered from the hash	Original data can be decrypted
+Used for password storage	Used when data must be recovered
+bcrypt is used for passwords	AES is a common encryption algorithm
+
+Remember: We do not decrypt a bcrypt password. We use bcrypt.compare().
+
+7. What is Salt in bcrypt?
+Salt is random data added as part of the password-hashing process.
+
+Why do we need it?
+
+Suppose two users have the same password:
+User A: hello123
+User B: hello123
+
+
+With bcrypt, each hash uses a different random salt.
+
+Therefore, the two stored hashes will normally be different.
+
+This makes precomputed attacks, such as rainbow-table attacks, harder.
+
+Example:
+const hash1 = await bcrypt.hash("hello123", 10);
+
+const hash2 = await bcrypt.hash("hello123", 10);
+
+
+Even though both passwords are the same, hash1 and hash2 will normally be different.
+
+bcrypt stores the salt information within the resulting hash.
+
+8. Authentication Project – Practical Implementation
+Now let's create a basic registration and login API.
+
+We will use:
+- Node.js
+- Express.js
+- MongoDB
+- Mongoose
+- bcrypt
+For now, our project will verify credentials and return a login-success response. We will add JWT authentication in the next lesson.
+Step 1: Create the project
+mkdir authentication-project
+
+cd authentication-project
+
+npm init -y
+
+
+Install dependencies:
+npm install express mongoose bcrypt dotenv
+
+
+Install nodemon:
+npm install nodemon --save-dev
+
+
+Step 2: Project structure
+authentication-project/
+│
+├── models/
+│   └── User.js
+│
+├── routes/
+│   └── authRoutes.js
+│
+├── controllers/
+│   └── authController.js
+│
+├── .env
+│
+├── .gitignore
+│
+├── package.json
+│
+└── server.js
+
+
+We are using MVC-style separation:
+- Model: Defines the user structure.
+- Controller: Contains registration and login logic.
+- Routes: Defines API endpoints.
+- Server: Connects everything.
+Step 3: Create .env
+PORT=5000
+
+MONGO_URI=mongodb://127.0.0.1:27017/authenticationDB
+
+
+You can use your MongoDB Atlas connection string instead of the local MongoDB URI.
+Step 4: Create .gitignore
+node_modules
+.env
+
+.............................................................
+Understand the model
+Name
+
+Stores the user's name.
+
+Email
+- Required field.
+- Must be unique.
+- Stored in lowercase.
+- Extra whitespace is removed.
+Password
+
+Stores the hashed password, not the original password.
+
+timestamps
+
+Automatically creates:
+createdAt
+updatedAt
+Our API endpoints will be:
+Method	Endpoint	Purpose
+POST	/api/auth/register	Register a user
+POST	/api/auth/login	Login a user
+13. Test Registration Using Postman
+POST
+ http://localhost:5000/api/auth/register
+
+Body → raw → JSON:
+{
+    "name": "Akshat",
+    "email": "akshat@gmail.com",
+    "password": "hello123"
+}
+
+
+Expected response:
+{
+    "message": "Registration successful",
+    "user": {
+        "id": "USER_ID",
+        "name": "Akshat",
+        "email": "akshat@gmail.com"
+    }
+}
+
+
+Notice that the response does not contain the password.
+
+Now check MongoDB.
+
+Your user document will look conceptually like this:
+{
+    "_id": "USER_ID",
+    "name": "Akshat",
+    "email": "akshat@gmail.com",
+    "password": "$2b$10$someBcryptHash..."
+}
+
+
+The database stores the password hash.
+14. Test Login Using Postman
+POST
+ http://localhost:5000/api/auth/login
+
+Body:
+{
+    "email": "akshat@gmail.com",
+    "password": "hello123"
+}
+
+
+Expected response:
+{
+    "message": "Login successful",
+    "user": {
+        "id": "USER_ID",
+        "name": "Akshat",
+        "email": "akshat@gmail.com"
+    }
+}
+
+
+Now try an incorrect password:
+{
+    "email": "akshat@gmail.com",
+    "password": "wrongpassword"
+}
+
+
+Expected status: 401 Unauthorized.
+
+15. Important Security Concepts
+Before moving ahead, understand these concepts.
+
+1. Never store plain-text passwords
+
+Always use a suitable password-hashing algorithm such as bcrypt or Argon2.
+
+2. Never return the password hash
+
+Even though a hash isn't the original password, don't expose it through API responses.
+
+3. Validate user input
+
+Check required fields, valid email format, and password length. Production applications should also implement rate limiting and appropriate request-size limits.
+
+4. Use HTTPS
+
+HTTPS protects credentials while they travel between the browser and server.
+
+5. Avoid revealing whether an email exists
+
+Using a generic login error such as "Invalid email or password" helps reduce account enumeration.
+
+6. Handle duplicate emails
+
+The unique: true option creates a MongoDB unique index when properly built. It is important to handle duplicate-key errors as well because two simultaneous registration requests can race.
+
+16. Authentication Interview Questions
+Question	Short answer
+What is authentication?	Verifying a user's identity.
+What is authorization?	Checking what a user is allowed to do.
+What is bcrypt?	A password-hashing library.
+What is password hashing?	One-way conversion of a password into a hash.
+Can we decrypt bcrypt hashes?	No. We use bcrypt.compare().
+What is salt?	Random data incorporated into password hashing.
+Why do we use bcrypt.compare()?	To check an entered password against a stored hash.
+Should we store plain-text passwords?	Never.
+What is 401?	Unauthorized – valid authentication is missing or unsuccessful.
+What is 409?	Conflict – for example, an email already exists.
