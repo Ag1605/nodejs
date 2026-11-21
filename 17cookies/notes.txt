@@ -1,0 +1,356 @@
+1. What is a Cookie?
+A cookie is a small piece of data that a website asks the browser to store.
+
+The server can use cookies to recognize a browser across multiple HTTP requests.
+
+Imagine you visit an e-commerce website.
+- You select your preferred language.
+- You add products to your cart.
+- You log in to your account.
+- You navigate to different pages.
+The website may use cookies to remember some of this information.
+
+A cookie is stored on the client side, generally in the browser.
+Example of a cookie:
+username=Akshat
+
+
+This contains:
+- Cookie name: username
+- Cookie value: Akshat
+Another example:
+theme=dark
+
+
+The browser stores this information and can send it back to the server with matching requests.
+
+Important: A cookie is not a database and is not an authentication mechanism by itself. It is a browser storage and HTTP transport mechanism.
+
+2. Why do we need Cookies?
+To understand why cookies are useful, first understand HTTP.
+
+HTTP is a stateless protocol.
+
+Stateless means the protocol itself does not remember previous requests.
+
+Example:
+
+Request 1:
+GET /login
+
+
+The user logs in successfully.
+
+Request 2:
+GET /profile
+
+
+HTTP does not automatically remember that the previous request was a successful login.
+
+Cookies can help the browser send an identifier with subsequent requests.
+
+Common use cases:
+Use case	Example
+Authentication	Login session identifier
+Preferences	Dark mode
+Language	English or Hindi
+Shopping cart	Cart identifier
+Tracking	Analytics identifier
+
+3. How do Cookies work internally?
+There are two important HTTP headers.
+- Set-Cookie: Server sends this to the browser.
+- Cookie: Browser sends this to the server.
+Let's understand the complete process.
+Step 1 – Browser sends request
+
+GET /login
+
+
+Step 2 – Server responds
+Set-Cookie: username=Akshat
+
+
+
+
+Step 3 – Browser stores cookie
+
+username = Akshat
+
+
+Step 4 – Browser makes another request
+GET /profile
+Cookie: username=Akshat
+
+
+
+
+Step 5 – Server reads cookie
+
+Server can recognize the cookie value
+
+
+Let's understand the two headers separately.
+A. Set-Cookie
+This header is sent from the server to the browser.
+
+Example:
+Set-Cookie: username=Akshat; Max-Age=3600
+
+
+It tells the browser to create or update a cookie.
+B. Cookie
+This header is sent from the browser to the server.
+
+Example:
+Cookie: username=Akshat
+
+
+The browser sends applicable cookies automatically, based on domain, path, expiration, Secure and SameSite rules.
+
+Notice the difference:
+Set-Cookie	Cookie
+Server to browser	Browser to server
+Creates or updates cookie	Sends stored cookie
+Can contain cookie attributes	Contains cookie name-value pairs
+
+
+4. Types of Cookies
+There are several ways to classify cookies.
+A. Session Cookies
+Session cookies generally do not have a persistent expiration date.
+
+They are usually removed when the browser session ends, although browser session restoration can affect this.
+
+Example:
+sessionId=abc123
+
+
+B. Persistent Cookies
+These cookies have an expiration time or maximum age.
+
+Example:
+rememberMe=true
+
+
+They remain stored until they expire or are deleted.
+C. First-Party Cookies
+These are set by the website you are visiting.
+
+Example:
+
+You visit:
+example.com
+
+
+And example.com sets a cookie.
+
+That is a first-party cookie.
+D. Third-Party Cookies
+These are associated with a different site or domain from the one you are visiting, often in embedded content or advertising contexts.
+
+Browser restrictions on third-party cookies vary.
+E. HttpOnly Cookies
+These cookies cannot be accessed by browser JavaScript using document.cookie.
+
+Example:
+res.cookie("token", "abc123", {
+    httpOnly: true
+});
+
+
+This helps reduce direct cookie theft through injected JavaScript.
+F. Secure Cookies
+Secure cookies are sent only over HTTPS connections, subject to special localhost handling by browsers.
+res.cookie("token", "abc123", {
+    secure: true
+});
+
+
+G. SameSite Cookies
+SameSite controls when cookies are sent with cross-site requests.
+
+There are three main values:
+Value	Meaning
+Strict	Restricts sending to same-site contexts
+Lax	Allows certain cross-site top-level navigations
+None	Allows cross-site sending; requires Secure
+
+Example:
+res.cookie("token", "abc123", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none"
+});
+
+
+
+5. Cookie Attributes – Very Important
+Cookie attributes control how the browser stores and sends cookies.
+Attribute	Purpose
+httpOnly	Prevents JavaScript access
+secure	Restricts sending to HTTPS
+sameSite	Controls cross-site sending
+maxAge	Cookie lifetime in milliseconds in Express
+expires	Specific expiration date
+path	URL path scope
+domain	Domain scope
+
+Let's understand an example:
+res.cookie("username", "Akshat", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "lax",
+    maxAge: 60 * 60 * 1000,
+    path: "/"
+});
+
+
+Meaning:
+- username: Cookie name.
+- Akshat: Cookie value.
+- httpOnly: JavaScript cannot access it.
+- secure: HTTPS only.
+- sameSite: Restricts cross-site requests.
+- maxAge: One hour.
+- path: Available across the site's paths.
+Important: httpOnly, Secure and SameSite are different security protections. They do not replace one another.
+
+Part 2 – Practical implementation
+Now let's create a complete cookie project using Node.js and Express.
+
+We will implement these operations separately:
+1. Create cookie.
+2. Read cookie.
+3. Update cookie.
+4. Delete cookie.
+5. Set expiration.
+6. Configure secure cookie attributes.
+6. Project setup
+Open your VS Code terminal.
+mkdir cookies-project
+cd cookies-project
+
+npm init -y
+
+npm install express cookie-parser
+
+npm install nodemon --save-dev
+
+
+Project structure:
+cookies-project/
+│
+├── server.js
+├── package.json
+└── .gitignore
+
+
+Update the scripts section in package.json:
+"scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+}
+
+
+Create .gitignore:
+node_modules
+.env
+
+
+7. Understand cookie-parser
+Install:
+npm install cookie-parser
+
+
+Why do we need this package?
+
+Express provides:
+res.cookie()
+
+
+to set cookies.
+
+However, Express does not automatically parse incoming Cookie headers into req.cookies.
+
+We use cookie-parser for that.
+
+Import:
+const cookieParser = require("cookie-parser");
+
+
+Register middleware:
+app.use(cookieParser());
+
+
+Now we can read cookies through:
+req.cookies
+
+
+Example:
+const username = req.cookies.username;
+14. Test all APIs using Postman
+Method	Endpoint	Purpose
+GET	/create-cookie	Create cookie
+GET	/read-cookie	Read cookie
+GET	/update-cookie	Update cookie
+GET	/delete-cookie	Delete cookie
+GET	/secure-cookie	Create secure cookie
+
+Postman normally maintains a cookie jar for requests to the same domain. You can inspect cookies using Postman's Cookies manager.
+
+You can also inspect browser cookies through:
+1. Open your website in Chrome.
+2. Press F12.
+3. Open Application.
+4. Select Storage → Cookies.
+5. Select your localhost domain.
+
+Part 4 – Important cookie security concepts
+Before we finish cookies, understand these three security topics.
+A. XSS – Cross-Site Scripting
+XSS happens when an attacker manages to inject malicious JavaScript into a webpage viewed by another user.
+
+For example, injected JavaScript might attempt to steal data accessible to the page.
+
+HttpOnly cookies prevent JavaScript from reading those cookies through document.cookie, which reduces one type of cookie theft.
+
+However, HttpOnly doesn't stop malicious JavaScript from making requests as the user.
+B. CSRF – Cross-Site Request Forgery
+CSRF is an attack where an attacker tricks a browser into sending an unwanted request to a website where the user is already authenticated.
+
+Why are cookies relevant?
+
+Because browsers automatically attach matching cookies to requests.
+
+Defenses include:
+- Appropriate SameSite cookie configuration.
+- CSRF tokens.
+- Origin/Referer validation where appropriate.
+- Careful design of state-changing endpoints.
+C. CORS – Cross-Origin Resource Sharing
+CORS is a browser security mechanism controlling whether JavaScript from one origin can access responses from another origin.
+
+For example:
+Frontend: http://localhost:5173
+Backend:  http://localhost:5000
+
+
+These are different origins.
+
+For a cross-origin frontend to use cookies, the backend must allow credentials and the frontend must send requests with credentials enabled. Cookie domain, SameSite and Secure settings must also permit the request.
+
+We'll study CORS separately in the security section.
+
+Part 5 – Interview revision
+Question	Answer
+What is a cookie?	Small data stored by the browser.
+What is Set-Cookie?	Server response header used to set cookies.
+What is Cookie header?	Browser request header that sends stored cookies.
+What is HttpOnly?	Prevents JavaScript from accessing the cookie.
+What is Secure?	Restricts cookie sending to HTTPS.
+What is SameSite?	Controls cross-site cookie sending.
+What is cookie-parser?	Express middleware that parses incoming cookies.
+How do you create a cookie?	res.cookie()
+How do you read a cookie?	req.cookies with cookie-parser
+How do you delete a cookie?	res.clearCookie()
