@@ -1,0 +1,703 @@
+Authorization is the next step after authentication. It determines what an authenticated user is allowed to access or perform.
+
+For example, in an e-commerce application:
+- A normal user can view products.
+- An admin can add products.
+- An admin can delete products.
+- A normal user cannot delete products.
+Both users can log in, but they have different permissions.
+
+1. What is Authorization?
+Authorization is the process of checking whether a user has permission to access a particular resource or perform a particular action.
+
+In simple language:
+- Authentication = Who are you?
+- Authorization = What are you allowed to do?
+Real-life example
+Imagine an office building.
+
+Employee
+
+Can enter the office and access their workspace.
+
+
+
+
+Admin
+
+Can enter the office and access restricted administrative areas.
+
+
+
+The security guard first verifies the person's identity.
+
+That is authentication.
+
+Then the guard checks whether the person is allowed to enter a restricted room.
+
+That is authorization.
+
+2. Authentication vs Authorization
+Authentication	Authorization
+Verifies user identity	Checks user permissions
+Happens before authorization	Usually follows authentication
+Checks email and password or a valid token	Checks role or permission
+Answers: Who are you?	Answers: What can you do?
+Example: Login	Example: Admin-only API
+
+Example:
+User logs in
+     |
+     v
+Authentication
+     |
+     v
+Identity verified
+     |
+     v
+Authorization
+     |
+     v
+Check user role
+     |
+     v
+Allow or deny access
+
+
+
+3. What are Roles?
+A role is a label assigned to a user that determines what the user is allowed to do.
+
+For example:
+Admin
+User
+Manager
+
+
+Different roles can have different permissions.
+Example of roles in an e-commerce application
+Feature	Admin	Manager	User
+View products	Yes	Yes	Yes
+Add products	Yes	Yes	No
+Update products	Yes	Yes	No
+Delete products	Yes	No	No
+View own orders	Yes	Yes	Yes
+Manage users	Yes	No	No
+
+Notice that different roles have different access levels.
+
+4. What is Role-Based Access Control (RBAC)?
+RBAC stands for Role-Based Access Control.
+
+It is an authorization approach in which permissions are assigned to roles, and users are assigned those roles.
+
+For example:
+User
+ |
+ |---- Role: Admin
+ |         |
+ |         |---- Add Product
+ |         |---- Delete Product
+ |         |---- Manage Users
+ |
+ |---- Role: Normal User
+           |
+           |---- View Product
+           |---- Buy Product
+
+
+Instead of checking individual permissions for every user, the application checks their role.
+How does RBAC work?
+Suppose a user logs in and their database record contains:
+{
+    "name": "Akshat",
+    "email": "akshat@gmail.com",
+    "role": "admin"
+}
+
+
+The backend knows that this user has the admin role.
+
+When the user requests an admin-only API, the backend checks:
+if (user.role === "admin") {
+    // Allow access
+}
+
+
+If the user is not an admin, access is denied.
+
+5. What is Authorization Middleware?
+In Express.js, we use middleware to check authorization.
+
+We already created authentication middleware in our JWT lesson.
+
+That middleware verifies the token and adds the decoded user information to:
+req.user
+
+
+Now we can create another middleware that checks the user's role.
+Authentication middleware
+Checks:
+Is the JWT valid?
+
+
+Authorization middleware
+Checks:
+Does the user have the required role?
+
+
+Complete flow:
+Client sends request
+
+
+Authentication Middleware
+
+Verify JWT token
+
+
+Authorization Middleware
+
+Check user role
+
+
+Allowed
+
+Continue to route
+
+
+Denied
+
+Return 403
+
+
+
+
+
+6. Important HTTP Status Codes
+Two status codes are particularly important here.
+Status	Meaning	Example
+401	Unauthorized – authentication is missing or invalid	No valid JWT
+403	Forbidden – identity is known, but permission is insufficient	Normal user accessing admin API
+
+Remember:
+- 401 = You haven't successfully authenticated.
+- 403 = You are authenticated, but you don't have permission.
+
+7. Practical Authorization Project
+Now let's implement authorization using our previous JWT authentication project.
+
+We will create three types of users:
+- Admin
+- Manager
+- User
+We will implement:
+1. User registration with a role.
+2. Login with JWT.
+3. Authentication middleware.
+4. Admin-only middleware.
+5. Manager and admin middleware.
+6. Protected APIs.
+7. Postman testing.
+Step 1: Project structure
+authentication-project/
+│
+├── models/
+│   └── User.js
+│
+├── controllers/
+│   └── authController.js
+│
+├── routes/
+│   ├── authRoutes.js
+│   └── userRoutes.js
+│
+├── middleware/
+│   ├── authMiddleware.js
+│   └── roleMiddleware.js
+│
+├── .env
+│
+├── server.js
+│
+└── package.json
+
+
+We will reuse the MongoDB connection and JWT setup from the previous lesson.\
+8. Test Authorization Using Postman
+Start the server:
+npm run dev
+
+
+Base URL:
+http://localhost:5000
+
+
+Test 1: Register a normal user
+POST
+ /api/auth/register
+
+Body:
+{
+    "name": "Akshat",
+    "email": "akshat@gmail.com",
+    "password": "hello123"
+}
+
+
+Expected role:
+{
+    "role": "user"
+}
+
+
+Test 2: Promote a test user to admin
+For this learning exercise, open MongoDB Compass and update the test user's role to:
+{
+    "role": "admin"
+}
+
+
+This is a trusted manual setup step, not a public API.
+Test 3: Login as admin
+POST
+ /api/auth/login
+
+Body:
+{
+    "email": "akshat@gmail.com",
+    "password": "hello123"
+}
+
+
+Copy the JWT from the response.
+Test 4: Access admin route
+GET
+ /api/users/admin
+
+In Postman Authorization:
+Type: Bearer Token
+Token: YOUR_ADMIN_TOKEN
+
+
+Expected response:
+{
+    "message": "Welcome Admin"
+}
+
+
+Test 5: Access admin route as normal user
+Register a second user and log in as that user.
+
+Send their token to:
+GET /api/users/admin
+
+
+Expected response:
+{
+    "message": "Access denied. Insufficient permissions."
+}
+
+
+Status code:
+403 Forbidden
+
+
+Test 6: Access manager route
+Use an admin or manager token:
+GET /api/users/manage
+
+
+Both roles should receive access.
+
+A normal user should receive 403.
+Test 7: Access a route without a token
+Send:
+GET /api/users/profile
+
+
+Without a Bearer token.
+
+Expected response:
+{
+    "message": "Token required"
+}
+
+
+Status code: 401.
+
+9. What is Permission-Based Authorization?
+So far, we have checked roles.
+
+But sometimes applications need more detailed permissions.
+
+For example:
+Admin:
+- create_product
+- update_product
+- delete_product
+- manage_users
+
+Manager:
+- create_product
+- update_product
+
+User:
+- view_product
+- buy_product
+
+
+This is more flexible than checking only roles.
+
+For example, instead of checking:
+allowRoles("admin")
+
+
+We could check:
+allowPermissions("delete_product")
+
+
+This approach is useful when applications have many roles and complex access rules.
+
+RBAC and permission-based checks can also be combined.
+
+10. What is Resource-Based Authorization?
+Resource-based authorization checks whether a user is allowed to access a particular resource.
+
+Example:
+
+Suppose two users have accounts:
+User A → Account 101
+User B → Account 102
+
+
+User A should not be able to access User B's private account just by changing an ID in the URL.
+
+For example:
+GET /api/accounts/102
+
+
+The backend must check whether the authenticated user owns account 102 or has an authorized role.
+
+This is different from simply checking whether someone is logged in.
+
+It is especially important for:
+- Orders
+- User profiles
+- Private documents
+- Bank accounts
+- Real estate listings
+- Invoices
+
+11. Important Security Best Practices
+1. Never allow users to assign themselves admin roles through public registration.
+2. Verify JWT signatures before checking roles.
+3. Don't trust role information directly from the request body.
+4. Check resource ownership when accessing private resources.
+5. Use HTTPS.
+6. Keep JWT secrets private.
+7. Consider current database roles for sensitive operations.
+8. Return 401 for failed authentication and 403 for insufficient permission.
+9. Log sensitive administrative actions.
+10. Apply the principle of least privilege: give each user only the permissions they need.
+
+12. Authentication and Authorization – Complete Comparison
+Concept	Purpose	Example
+Cookies	Browser-side storage	Session ID cookie
+Sessions	Server-side state	Logged-in user session
+Authentication	Verify identity	Email and password
+JWT	Signed token format	Access token
+Authorization	Check permissions	Admin-only API
+RBAC	Authorization based on roles	Admin, Manager, User
+Permission-based access	Check specific permissions	delete_product
+
+
+13. Interview Questions
+Q1. What is authorization?
+
+Authorization determines what an authenticated user is allowed to access or perform.
+
+Q2. What is RBAC?
+
+Role-Based Access Control assigns permissions to roles and roles to users.
+
+Q3. What is the difference between 401 and 403?
+
+401 means authentication is missing or invalid. 403 means the user is authenticated but does not have sufficient permission.
+
+Q4. What is authorization middleware?
+
+It is Express middleware that checks the user's role or permission before allowing access to a route.
+
+Q5. Why should users not select their own roles during registration?
+
+Because they could assign themselves privileged roles such as admin.
+
+Q6. Can a normal user access an admin route?
+
+Not if the backend correctly checks authorization.
+
+Q7. What is the principle of least privilege?
+
+Give users only the permissions they need to perform their tasks.
+
+Q8. What is resource-based authorization?
+
+It checks whether the user has permission to access a particular resource, such as their own order or account.
+
+Q9. Is authentication enough to protect an admin route?
+
+No. Authentication verifies identity, but authorization must also verify the user's permissions.
+
+Q10. Should we trust the role sent by the frontend?
+
+No. The backend must determine the user's role from a trusted source.
+
+
+
+
+
+
+name
+Below is the complete Authorization project from Step 1 to Step 8, with every folder name, file name, and complete replaceable code.
+
+We will build a Node.js + Express.js + MongoDB + JWT project with three roles:
+
+user
+
+manager
+
+admin
+
+You will implement registration, login, JWT authentication, role-based authorization, and protected routes.
+
+1. Create project and install packages
+Open VS Code terminal.
+
+mkdir authorization-project
+cd authorization-project
+
+npm init -y
+
+npm install express mongoose bcrypt jsonwebtoken dotenv
+
+npm install nodemon --save-dev
+
+Update the scripts section of package.json:
+
+File: package.json
+
+{
+  "name": "authorization-project",
+  "version": "1.0.0",
+  "description": "Authentication and Authorization using Node.js",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "dotenv": "^16.0.0",
+    "express": "^5.0.0",
+    "jsonwebtoken": "^9.0.0",
+    "mongoose": "^8.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.0"
+  }
+}
+
+You can keep the dependency versions generated by your own npm install; you do not need to replace them with the versions shown above.
+
+2. Complete project folder structure
+Create these folders and files in VS Code.
+
+authorization-project/
+
+models/
+
+User.js
+
+controllers/
+
+authController.js
+
+routes/
+
+authRoutes.js
+
+userRoutes.js
+
+middleware/
+
+authMiddleware.js
+
+roleMiddleware.js
+
+server.js
+
+.env
+
+.gitignore
+
+package.json
+9. Create an Admin User for Testing
+By default, every new registration creates a normal user.
+
+To test admin authorization, create a user through registration first, then promote that account using a trusted database operation.
+
+In MongoDB Compass, open your authorizationDB database and users collection.
+
+Find the test user's document and change:
+{
+    "role": "user"
+}
+
+
+To:
+{
+    "role": "admin"
+}
+
+
+For a manager test account, use:
+{
+    "role": "manager"
+}
+
+
+Important: Because our current login JWT contains the role, log in again after changing the role. Previously issued tokens still contain the old role. For a production admin system, fetch the current role from the database or implement a suitable role-revocation strategy.
+
+10. Complete API Testing in Postman
+Base URL: http://localhost:5000
+Test	Method	Endpoint
+Register	POST	/api/auth/register
+Login	POST	/api/auth/login
+Profile	GET	/api/users/profile
+Admin	GET	/api/users/admin
+Manager	GET	/api/users/manage
+Dashboard	GET	/api/users/dashboard
+
+Test 1 – Register normal user
+POST
+ /api/auth/register
+
+Body → raw → JSON:
+{
+    "name": "Akshat",
+    "email": "akshat@gmail.com",
+    "password": "hello123"
+}
+
+
+Expected response:
+{
+    "message": "Registration successful",
+    "user": {
+        "name": "Akshat",
+        "email": "akshat@gmail.com",
+        "role": "user"
+    }
+}
+
+
+Test 2 – Login
+POST
+ /api/auth/login
+{
+    "email": "akshat@gmail.com",
+    "password": "hello123"
+}
+
+
+Copy the JWT from the response.
+Test 3 – Access profile
+GET
+ /api/users/profile
+
+Authorization tab:
+Type: Bearer Token
+Token: YOUR_JWT_TOKEN
+
+
+Expected: 200 OK.
+Test 4 – Access admin route
+GET
+ /api/users/admin
+
+Use an admin token.
+
+Expected:
+{
+    "message": "Welcome Admin"
+}
+
+
+Test 5 – Try admin route with normal user token
+Use a normal user's token.
+
+Expected:
+403 Forbidden
+{
+    "message": "Access denied. Insufficient permissions."
+}
+
+
+Test 6 – Access manager route
+GET
+ /api/users/manage
+- Admin: Allowed.
+- Manager: Allowed.
+- User: Denied.
+Test 7 – Access without a token
+Try /api/users/profile without a Bearer token.
+
+Expected:
+401 Unauthorized
+{
+    "message": "Access denied. Token required."
+}
+
+
+
+11. Final API Summary
+User role	Profile	Admin	Manage	Dashboard
+User	Yes	No	No	Yes
+Manager	Yes	No	Yes	Yes
+Admin	Yes	Yes	Yes	Yes
+
+Important production improvements
+This is a learning project. Before using this design in production, add:
+- Input validation and request rate limiting.
+- HTTPS and secure token storage.
+- Refresh-token rotation and revocation if required.
+- Current database role checks for sensitive admin operations.
+- Resource ownership checks so users cannot access another user's private data.
+- A controlled admin-creation and role-management process.
+Your complete project flow is now:
+Registration
+
+Create user and hash password
+
+
+Login
+
+Verify password and generate JWT
+
+
+Authentication Middleware
+
+Verify JWT and identify user
+
+
+Authorization Middleware
+
+Check user role and permission
+
+
+Protected API
+
+Allow or deny access
+
+
+You can now build this project file by file in VS Code and test each endpoint in Postman.
