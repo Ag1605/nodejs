@@ -1,0 +1,630 @@
+In the previous lesson, we learned authentication using registration, login, MongoDB, and bcrypt.
+
+Now let's learn JWT (JSON Web Token), which is a widely used way to authenticate users in backend applications.
+
+The main idea is:
+- User logs in with email and password.
+- Server verifies the credentials.
+- Server generates a JWT.
+- Client stores the token.
+- Client sends the token with future requests.
+- Server verifies the token before allowing access to protected routes.
+First, let's understand the theory, then we will build the complete project.
+
+1. What is JWT?
+JWT stands for JSON Web Token.
+
+It is a compact token format used to securely transmit information between two parties.
+
+In backend authentication, the server generates a token after successful login. The client sends this token with future requests to prove its identity.
+
+Think of JWT as a digital entry pass.
+
+For example:
+
+You enter an office and show your ID card.
+
+The security guard checks the ID card before allowing you inside.
+
+Similarly:
+- JWT = Digital token.
+- Server = Security guard.
+- Protected API = Restricted area.
+The server verifies the token before allowing access.
+2. Why do we need JWT?
+Consider a normal login system.
+1. User logs in.
+2. Server verifies email and password.
+3. User wants to access their profile.
+4. Server needs a way to identify the user again.
+One approach is session-based authentication, which we studied in the previous lesson.
+
+Another approach is token-based authentication using JWT.
+
+With JWT, the server can verify a signed token on each request without looking up a server-side session record.
+
+This is useful for APIs, mobile applications, and distributed systems.
+
+Important: JWT is not automatically more secure than sessions. Both need correct implementation and secure storage.
+
+3. How JWT Authentication Works
+JWT authentication flow
+1. Client
+
+Sends email and password
+
+POST /login
+
+2. Backend
+
+Checks credentials using MongoDB and bcrypt
+
+
+3. JWT generated
+
+Server signs a token using a secret key
+
+
+4. Client receives token
+
+Stores it securely
+
+
+When accessing a protected API:
+Client sends token in Authorization header
+
+Backend verifies JWT signature and expiry
+
+Valid token → Access granted
+
+
+Let's understand each part in detail.
+
+4. Structure of JWT
+A JWT contains three parts:
+1. Header
+2. Payload
+3. Signature
+They are separated by dots (.).
+
+A JWT looks like this:
+xxxxx.yyyyy.zzzzz
+
+
+JWT structure
+HEADER
+
+PAYLOAD
+
+SIGNATURE
+
+
+These three encoded parts are joined with two dots.
+
+A. Header
+The header contains information about the token type and signing algorithm.
+
+Example:
+{
+    "alg": "HS256",
+    "typ": "JWT"
+}
+
+
+Meaning:
+- alg = Algorithm used to sign the token.
+- typ = Token type.
+Here, HS256 is a signing algorithm based on HMAC and SHA-256.
+B. Payload
+The payload contains claims, which are pieces of information about the user or token.
+
+Example:
+{
+    "id": "101",
+    "email": "akshat@gmail.com",
+    "role": "user"
+}
+
+
+You can also include standard claims:
+Claim	Meaning
+sub	Subject, usually user ID
+iat	Issued-at time
+exp	Expiration time
+iss	Issuer
+aud	Audience
+
+Very important: JWT payloads are encoded, not encrypted by default.
+
+Anyone who gets a normal signed JWT can decode and read its payload.
+
+Therefore, never put passwords, secrets, or sensitive personal information inside a JWT payload.
+C. Signature
+The signature is used to verify that the token has not been modified and was signed by someone who knows the signing secret or private key.
+
+For an HMAC-based JWT, conceptually:
+HMAC-SHA256(
+    encodedHeader + "." + encodedPayload,
+    secret
+)
+
+
+If someone changes the payload, the signature will no longer match.
+
+The server can detect that the token has been tampered with.
+
+5. What is Encoding vs Encryption vs Signing?
+These three concepts are different.
+Concept	Meaning
+Encoding	Changes data into another representation
+Encryption	Protects data so it can be read only with the correct key
+Signing	Allows verification of authenticity and integrity
+
+JWT uses Base64URL encoding for its header and payload.
+
+A signed JWT is not automatically encrypted.
+
+For example, if your payload contains:
+{
+    "email": "akshat@gmail.com"
+}
+
+
+Someone who has the token can decode and read the email.
+
+But changing the payload will invalidate the signature.
+
+6. What is a Secret Key?
+A secret key is used by the server to sign and verify a JWT when using a symmetric algorithm such as HS256.
+
+Example:
+const token = jwt.sign(
+    { id: user._id },
+    process.env.JWT_SECRET
+);
+
+
+The server uses the same secret to verify the token.
+jwt.verify(token, process.env.JWT_SECRET);
+
+
+Keep this secret in .env.
+
+Never share it with the frontend or commit it to GitHub.
+
+7. Important JWT Functions
+In Node.js, we commonly use the jsonwebtoken package.
+
+Install it:
+npm install jsonwebtoken
+
+
+There are three important functions.
+A. jwt.sign()
+Creates and signs a JWT.
+const jwt = require("jsonwebtoken");
+
+const token = jwt.sign(
+    { id: 101 },
+    "my-secret-key",
+    { expiresIn: "1h" }
+);
+
+
+Here:
+- { id: 101 } = Payload.
+- "my-secret-key" = Signing secret.
+- "1h" = Token expires after one hour.
+B. jwt.verify()
+Verifies the signature and checks claims such as expiry.
+const decoded = jwt.verify(
+    token,
+    "my-secret-key"
+);
+
+
+If valid, it returns the decoded payload.
+
+If invalid or expired, it throws an error.
+C. jwt.decode()
+Decodes the token without verifying its signature.
+const decoded = jwt.decode(token);
+
+
+Important difference:
+- decode() reads the payload.
+- verify() validates the token's signature and relevant claims.
+Never use jwt.decode() alone to authenticate a user.
+
+8. What is Token Expiration?
+A token should not remain valid forever.
+
+For example:
+const token = jwt.sign(
+    { id: user._id },
+    process.env.JWT_SECRET,
+    { expiresIn: "15m" }
+);
+
+
+This token expires after 15 minutes.
+
+After expiry, jwt.verify() rejects it.
+
+Common expiration formats:
+Value	Meaning
+"15s"	15 seconds
+"15m"	15 minutes
+"1h"	1 hour
+"7d"	7 days
+
+
+9. What are Access Tokens and Refresh Tokens?
+These are two important concepts in real-world authentication.
+Access Token
+An access token is used to access protected APIs.
+
+Example:
+GET /api/profile
+Authorization: Bearer ACCESS_TOKEN
+
+
+It usually has a short lifetime.
+
+For example, 15 minutes.
+Refresh Token
+A refresh token is used to obtain a new access token when the old one expires.
+
+It generally has a longer lifetime.
+
+For example, 7 days.
+Why do we need both?
+Imagine:
+1. User logs in.
+2. Server issues an access token valid for 15 minutes.
+3. User continues using the application.
+4. Access token expires.
+5. Client sends the refresh token to a refresh endpoint.
+6. Server validates the refresh token.
+7. Server issues a new access token.
+This avoids asking the user to log in again every 15 minutes.
+Access token lifecycle
+Login successful
+
+Access token issued – short lifetime
+
+Access token expires
+
+Refresh token validated
+
+New access token issued
+
+We will first implement access-token authentication. Refresh-token implementation is a separate extension that we can build after understanding the basic system.
+
+10. How does the client send a JWT?
+The client normally sends the access token in the HTTP Authorization header.
+
+The format is:
+Authorization: Bearer YOUR_JWT_TOKEN
+
+
+What does Bearer mean?
+
+It indicates that the request is carrying a bearer token. Whoever possesses a valid token can generally use it, so protect it carefully.
+
+Example:
+GET /api/profile
+
+Authorization: Bearer eyJhbGciOiJIUzI1Ni...
+
+
+The backend extracts the token from the header and verifies it.
+
+11. What is JWT Authentication Middleware?
+Middleware is a function that runs between the incoming request and the route handler.
+
+In JWT authentication, middleware checks whether the request contains a valid token.
+
+For example:
+Client Request
+      |
+      v
+JWT Middleware
+      |
+      v
+Is token valid?
+    /     \
+  Yes      No
+   |        |
+   v        v
+Profile   401 Error
+ Route
+
+
+This means we don't need to write token-verification code inside every protected route.
+
+We create middleware once and reuse it.
+
+12. Practical Project – JWT Authentication
+We will continue using the authentication project from the previous lesson.
+
+Our project structure will now look like this:
+authentication-project/
+│
+├── models/
+│   └── User.js
+│
+├── routes/
+│   └── authRoutes.js
+│
+├── controllers/
+│   └── authController.js
+│
+├── middleware/
+│   └── authMiddleware.js
+│
+├── .env
+├── .gitignore
+├── package.json
+└── server.js
+
+
+Step 1: Install jsonwebtoken
+Open your terminal:
+npm install jsonwebtoken
+
+
+Step 2: Update .env
+Add a JWT secret:
+PORT=5000
+
+MONGO_URI=mongodb://127.0.0.1:27017/authenticationDB
+
+JWT_SECRET=replace_this_with_a_long_random_secret
+
+
+Use a long, randomly generated secret in a real application. Keep .env out of Git.
+Step 3: Understand the login process
+In our previous authentication lesson, we already implemented:
+1. Find user in MongoDB.
+2. Compare password using bcrypt.
+3. Return login successful.
+Now we will add one extra step:
+
+After successful password comparison, generate a JWT and return it to the client.
+
+
+17. Test JWT Authentication Using Postman
+Start your backend:
+npm run dev
+
+
+Server running
+Base URL:
+http://localhost:5000
+
+
+Test 1: Register a user
+POST
+ /api/auth/register
+
+Body → raw → JSON:
+{
+    "name": "Akshat",
+    "email": "akshat@gmail.com",
+    "password": "hello123"
+}
+
+
+You should receive a successful registration response.
+Test 2: Login
+POST
+ /api/auth/login
+
+Body:
+{
+    "email": "akshat@gmail.com",
+    "password": "hello123"
+}
+
+
+Expected response:
+{
+    "message": "Login successful",
+    "token": "eyJhbGciOiJIUzI1NiIs...",
+    "user": {
+        "id": "USER_ID",
+        "name": "Akshat",
+        "email": "akshat@gmail.com"
+    }
+}
+
+
+Copy the token from the response.
+Test 3: Access Profile Without Token
+GET
+ /api/users/profile
+
+Don't provide an Authorization header.
+
+Expected response:
+{
+    "message": "Access denied. Token required."
+}
+
+
+Status code:
+401 Unauthorized
+
+
+Test 4: Access Profile With Token
+Open the Authorization tab in Postman.
+
+Select:
+Type: Bearer Token
+
+
+Paste the token you copied from the login response.
+
+Now send:
+GET http://localhost:5000/api/users/profile
+
+
+Expected response:
+{
+    "message": "Profile accessed successfully",
+    "user": {
+        "_id": "USER_ID",
+        "name": "Akshat",
+        "email": "akshat@gmail.com"
+    }
+}
+
+
+JWT authentication successful
+Test 5: Change One Character in the Token
+Change one character in the token and send the request again.
+
+Expected response:
+{
+    "message": "Invalid or expired token"
+}
+
+
+Why?
+
+Because changing the token changes its contents, so the signature verification fails.
+Test 6: Use an Expired Token
+Once the token has expired, send the profile request again.
+
+The server should reject it.
+
+This is because jwt.verify() checks the expiration claim.
+
+18. Where should we store JWT on the frontend?
+This is an important security question.
+
+There are two common approaches.
+Option 1: Store token in localStorage
+localStorage.setItem("token", token);
+
+
+Read it:
+const token = localStorage.getItem("token");
+
+
+Remove it:
+localStorage.removeItem("token");
+
+
+The advantage is that it persists across browser refreshes.
+
+However, JavaScript can read localStorage. If malicious JavaScript executes through an XSS vulnerability, it may steal the token.
+Option 2: Store token in an HttpOnly cookie
+The server sends the token in a cookie with suitable security settings:
+res.cookie("accessToken", token, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "lax"
+});
+
+
+JavaScript cannot directly read an HttpOnly cookie.
+
+However, cookie-based authentication needs appropriate CSRF protection and cookie configuration.
+
+Which is better?
+
+There is no universal answer. The correct approach depends on your application architecture and threat model.
+
+For our Postman learning project, we are simply returning the token in JSON and manually sending it as a Bearer token.
+
+19. JWT vs Session Authentication
+This is a very common backend interview question.
+Feature	Session	JWT
+Where is authentication data kept?	Server-side session store	Claims are carried inside the token
+Client stores	Usually session ID cookie	Usually access token
+Server lookup	Looks up session	Verifies token signature and claims
+Logout	Destroy session	Client discards token; revocation needs additional handling
+Expiration	Session expiry	Token expiry
+Scaling	Requires shared session store across instances	Signature verification can be distributed
+Immediate revocation	Usually straightforward	Requires additional mechanisms
+
+Important point about JWT logout
+Suppose your JWT expires after 15 minutes.
+
+The user clicks Logout after 2 minutes.
+
+If you only remove the token from the browser, the token itself remains valid until its expiry.
+
+Someone who has stolen a copy may still use it.
+
+JWTs are not automatically invalidated when the user logs out.
+
+For immediate revocation, applications may use:
+- Token blocklists.
+- Token versioning.
+- Short-lived access tokens.
+- Refresh-token rotation and revocation.
+
+20. Common JWT Mistakes
+Mistake	Correct approach
+Putting passwords in JWT	Never include passwords or password hashes
+Using jwt.decode() for authentication	Use jwt.verify()
+Keeping tokens valid forever	Set an appropriate expiry
+Sharing JWT secret with frontend	Keep it only on the server
+Not checking the Bearer header	Validate the header format
+Storing sensitive information in payload	Remember payload is readable
+Using HTTP in production	Use HTTPS
+Assuming logout destroys a JWT	Implement appropriate revocation or token lifecycle handling
+
+Another important point: a valid JWT proves that its claims were signed and are valid according to the checks you perform. It does not automatically prove that the account is still active or that the user still has permission to access a resource. Those checks may require a database lookup.
+
+21. Common JWT Interview Questions
+Q1. What is JWT?
+
+JWT stands for JSON Web Token. It is a compact token format used to transmit signed information between parties.
+
+Q2. What are the three parts of JWT?
+
+Header, Payload, and Signature.
+
+Q3. Is JWT encrypted?
+
+A normal signed JWT is not encrypted. Its payload can be decoded and read.
+
+Q4. What is the purpose of a JWT signature?
+
+To verify the token's authenticity and integrity.
+
+Q5. What is jwt.sign()?
+
+It creates and signs a JWT.
+
+Q6. What is jwt.verify()?
+
+It verifies the token's signature and checks claims such as expiration.
+
+Q7. What is jwt.decode()?
+
+It decodes a token without verifying its signature.
+
+Q8. What is the difference between access and refresh tokens?
+
+An access token accesses protected resources. A refresh token is used to obtain a new access token.
+
+Q9. What is Bearer authentication?
+
+A method where the client sends a token in the Authorization header using the Bearer scheme.
+
+Q10. Can a JWT be modified?
+
+Someone can modify its encoded contents, but a correctly implemented signature verification will reject the modified token.
+
+Q11. What happens when a JWT expires?
+
+The server rejects it during verification.
+
+Q12. Does JWT require a database lookup on every request?
+
+Not necessarily. The server can verify a signed JWT without a database lookup. However, it may still query the database for account status, current permissions, or revocation checks.
